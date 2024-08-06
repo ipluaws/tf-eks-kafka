@@ -1,0 +1,54 @@
+kafka:
+  name: kafka-cluster
+  namespace: kafka
+  kafka:
+    version: 3.6.0
+    replicas: 1
+    listenerName: plain
+    listenerPort: 9092
+    listenerType: internal
+    listenerTls: false
+    config:
+      offsetsTopicReplicationFactor: 1
+      transactionStateLogReplicationFactor: 1
+      transactionStateLogMinIsr: 1
+      logMessageFormatVersion: "3.6"
+    storage:
+      type: persistent-claim
+      size: 10Gi
+      deleteClaim: false
+      class: gp3
+  zookeeper:
+    replicas: 1
+    storage:
+      type: persistent-claim
+      size: 10Gi
+      deleteClaim: false
+      class: gp3
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+
+storageClass:
+  name: gp3
+  provisioner: ebs.csi.aws.com
+  parameters:
+    type: gp3
+    fsType: ext4
+  reclaimPolicy: Retain
+  volumeBindingMode: WaitForFirstConsumer
+  allowVolumeExpansion: true
+
+hpa:
+  enabled: true
+  kafka:
+    minReplicas: 1
+    maxReplicas: 10
+    cpu:
+      targetAverageUtilization: 80
+  zookeeper:
+    minReplicas: 1
+    maxReplicas: 10
+    cpu:
+      targetAverageUtilization: 80
+

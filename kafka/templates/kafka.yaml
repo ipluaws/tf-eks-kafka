@@ -1,0 +1,59 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: {{ .Values.kafka.name }}
+  namespace: {{ .Values.kafka.namespace }}
+spec:
+  kafka:
+    version: {{ .Values.kafka.kafka.version }}
+    replicas: {{ .Values.kafka.kafka.replicas }}
+    listeners:
+      - name: {{ .Values.kafka.kafka.listenerName }}
+        port: {{ .Values.kafka.kafka.listenerPort }}
+        type: {{ .Values.kafka.kafka.listenerType }}
+        tls: {{ .Values.kafka.kafka.listenerTls }}
+    config:
+      offsets.topic.replication.factor: {{ .Values.kafka.kafka.config.offsetsTopicReplicationFactor }}
+      transaction.state.log.replication.factor: {{ .Values.kafka.kafka.config.transactionStateLogReplicationFactor }}
+      transaction.state.log.min.isr: {{ .Values.kafka.kafka.config.transactionStateLogMinIsr }}
+      log.message.format.version: "{{ .Values.kafka.kafka.config.logMessageFormatVersion }}"
+    storage:
+      type: {{ .Values.kafka.kafka.storage.type }}
+      size: {{ .Values.kafka.kafka.storage.size }}
+      deleteClaim: {{ .Values.kafka.kafka.storage.deleteClaim }}
+      class: {{ .Values.kafka.kafka.storage.class }}
+    template:
+      pod:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: strimzi.io/name
+                  operator: In
+                  values:
+                  - kafka-cluster-kafka
+              topologyKey: kubernetes.io/hostname
+  zookeeper:
+    replicas: {{ .Values.kafka.zookeeper.replicas }}
+    storage:
+      type: {{ .Values.kafka.zookeeper.storage.type }}
+      size: {{ .Values.kafka.zookeeper.storage.size }}
+      deleteClaim: {{ .Values.kafka.zookeeper.storage.deleteClaim }}
+      class: {{ .Values.kafka.zookeeper.storage.class }}
+    template:
+      pod:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: strimzi.io/name
+                  operator: In
+                  values:
+                  - kafka-cluster-zookeeper
+              topologyKey: kubernetes.io/hostname
+  entityOperator:
+    topicOperator: {{ toYaml .Values.kafka.entityOperator.topicOperator | indent 4 }}
+    userOperator: {{ toYaml .Values.kafka.entityOperator.userOperator | indent 4 }}
+

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+  labels:
+    app: consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+      - name: consumer
+        image: 654654148473.dkr.ecr.eu-central-1.amazonaws.com/consumer:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consumer
+spec:
+  selector:
+    app: consumer
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP
+

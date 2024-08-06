@@ -1,0 +1,21 @@
+replicaCount: 1
+
+image:
+  repository: 654654148473.dkr.ecr.eu-central-1.amazonaws.com/consumer
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  name: consumer
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+env:
+  kafkaBootstrapServers: kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
+
+
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
